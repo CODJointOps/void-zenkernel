@@ -12,6 +12,7 @@ distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version
 # Update checksum once you get the actual one for the Zen version
 checksum="4d1f061e24f28e63bdb07ddf9ceff94b0ed917882d4a3e21dec6c7bc7508a71b"  # replace with the correct checksum
 archs="x86_64* i686* ppc* aarch64*"
+patch_args="-Np1"
 
 # Standard kernel template setup
 nodebug=yes
