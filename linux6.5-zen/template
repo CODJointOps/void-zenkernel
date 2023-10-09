@@ -1,7 +1,7 @@
 # Description
 pkgname=linux6.5-zen
 version=6.5.6
-revision=1
+revision=3
 zen=2
 python_version=3
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series)"
