@@ -1,8 +1,8 @@
 # Description
 pkgname=linux6.5-zen
-version=6.5.6
-revision=6
-zen=2
+version=6.5.7
+revision=1
+zen=1
 python_version=3
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series)"
 maintainer="Wizzard <retard@deadzone.lol>"
@@ -10,7 +10,7 @@ license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
 # Update checksum once you get the actual one for the Zen version
-checksum="4d1f061e24f28e63bdb07ddf9ceff94b0ed917882d4a3e21dec6c7bc7508a71b"  # replace with the correct checksum
+checksum="21b881332c189ce3994bbfa3496daae0fa0890f478814b20c045f3180b4ff12c"  # replace with the correct checksum
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
