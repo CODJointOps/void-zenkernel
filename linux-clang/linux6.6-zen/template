@@ -1,6 +1,6 @@
 # Template file for 'linux6.5-zen'
 pkgname=linux6.5-zen
-version=6.5.9
+version=6.6.1
 revision=1
 zen=2
 wrksrc="linux-${version}-zen${zen}"
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="6cff9e403d678afee072a0047069d0a1103d810e193ef8a2618ce0495f62ea63"
+checksum="14fc1059adcb1c1433c011b11bbf91288610bc16220f0bacf27318eaca8a4f1b"
 python_version=3
 patch_args="-Np1"
 
