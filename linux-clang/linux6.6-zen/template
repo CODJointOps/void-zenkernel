@@ -1,5 +1,4 @@
-# Template file for 'linux6.5-zen'
-pkgname=linux6.5-zen
+pkgname=linux6.6-zen
 version=6.6.1
 revision=1
 zen=1
