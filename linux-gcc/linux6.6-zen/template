@@ -1,6 +1,6 @@
 # Description
 pkgname=linux6.6-zen
-version=6.6.2
+version=6.6.3
 revision=1
 zen=1
 python_version=3
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="ea20e2b3f05ee680a65ae2860ee30451a4f9a37a3a6173f0a9f21733db0ce72e"
+checksum="56705161b031555aa5a5a4807d2170107d66bef313335634aac7afc87a31b19c"
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
