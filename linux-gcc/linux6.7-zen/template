@@ -299,7 +299,7 @@ do_install() {
 	depmod -b ${DESTDIR}/usr -F System.map ${_kernver}
 }
 
-linux6.6-zen-headers_package() {
+linux6.7-zen-headers_package() {
 	preserve=yes
 	nostrip=yes
 	noshlibprovides=yes
@@ -309,7 +309,7 @@ linux6.6-zen-headers_package() {
 		vmove usr/lib/modules/${_kernver}/build
 	}
 }
-linux6.6-zen-dbg_package() {
+linux6.7-zen-dbg_package() {
 	preserve=yes
 	nostrip=yes
 	noverifyrdeps=yes
