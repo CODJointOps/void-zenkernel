@@ -1,14 +1,14 @@
 pkgname=linux6.7-zen
-version=6.7
-revision=2
-zen=3
+version=6.7.1
+revision=1
+zen=1
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="897d4e2d27899224f1f7987ff5446793e638fe0b5d93c2226e4845b58011b2d4"
+checksum="0cdeb5425092087e3b5c550bd3ca14fc554b8c28100907dae7fd084044bfa850"
 python_version=3
 patch_args="-Np1"
 
