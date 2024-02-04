@@ -1,0 +1,39 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH RFC v2 28/29] maintainers: Add an entry for ntsync.
+From: Elizabeth Figura <zfigura@codeweavers.com>
+Date: Tue, 30 Jan 2024 20:13:55 -0600
+Message-Id: <20240131021356.10322-29-zfigura@codeweavers.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Add myself as maintainer, supported by CodeWeavers.
+
+Signed-off-by: Elizabeth Figura <zfigura@codeweavers.com>
+---
+ MAINTAINERS | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 8d1052fa6a69..7924127d351b 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -15585,6 +15585,15 @@ T:	git https://github.com/Paragon-Software-Group/linux-ntfs3.git
+ F:	Documentation/filesystems/ntfs3.rst
+ F:	fs/ntfs3/
+ 
++NTSYNC SYNCHRONIZATION PRIMITIVE DRIVER
++M:	Elizabeth Figura <zfigura@codeweavers.com>
++L:	wine-devel@winehq.org
++S:	Supported
++F:	Documentation/userspace-api/ntsync.rst
++F:	drivers/misc/ntsync.c
++F:	include/uapi/linux/ntsync.h
++F:	tools/testing/selftests/drivers/ntsync/
++
+ NUBUS SUBSYSTEM
+ M:	Finn Thain <fthain@linux-m68k.org>
+ L:	linux-m68k@lists.linux-m68k.org
+-- 
+2.43.0
+
