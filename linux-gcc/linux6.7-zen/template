@@ -1,6 +1,6 @@
 pkgname=linux6.7-zen
-version=6.7.2
-revision=2
+version=6.7.4
+revision=1
 zen=1
 python_version=3
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series)"
@@ -8,7 +8,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="69add7e7f243e9ef6ef7c24066fee51eb5e06e66e6d4bdbfa22e43fdbf2155e8"
+checksum="c4e702ad7cb5341f8a6563dcfc24e17d8952dfcdc79d4f467eca398ee0be9d47"
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
