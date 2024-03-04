@@ -1,5 +1,5 @@
 pkgname=linux6.7-zen
-version=6.7.7
+version=6.7.8
 revision=1
 zen=1
 python_version=3
@@ -8,7 +8,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="4e0940faa1a05568ad3d01fa77ffbf26fbc80a46a44c1bc05a1370299b6e6720"
+checksum="2bbf8e1f4deb5986d0e4f241ac39753cbcd079d9b3ea2d8e5030aeeb7bd2b4d6"
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
