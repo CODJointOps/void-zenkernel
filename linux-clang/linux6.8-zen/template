@@ -1,5 +1,5 @@
 pkgname=linux6.8-zen
-version=6.8.1
+version=6.8.2
 revision=1
 zen=1
 wrksrc="linux-${version}-zen${zen}"
@@ -8,7 +8,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="554191b2deb46f93b4e3c2b0da53f5078751734bd2760a18e4e2a54b8e039620"
+checksum="237f3a42a263d64c87c75770b4467964709f944cf21d8494beb2962e8dcba308"
 python_version=3
 patch_args="-Np1"
 
