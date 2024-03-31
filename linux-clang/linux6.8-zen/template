@@ -1,6 +1,6 @@
 pkgname=linux6.8-zen
 version=6.8.2
-revision=1
+revision=2
 zen=2
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
@@ -18,7 +18,7 @@ noverifyrdeps=yes
 noshlibprovides=yes
 preserve=yes
 
-hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel
+hostmakedepends="tar lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel
  openssl-devel perl uboot-mkimage cpio clang llvm lld pahole python3 which"
 
 if [[ $version =~ ^[0-9]+\.[0-9]+$ ]]; then
