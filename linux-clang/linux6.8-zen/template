@@ -1,14 +1,14 @@
 pkgname=linux6.8-zen
-version=6.8.2
-revision=2
-zen=2
+version=6.8.3
+revision=1
+zen=1
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="a67f001abc00886b8e90d097932c32ddcfb5e982fc93154d4e226246e9c8fbaf"
+checksum="dc43c9c936b502d57f5e1e0c1b55d87a21acb778b728c864ac80773da4877e89"
 python_version=3
 patch_args="-Np1"
 
@@ -18,7 +18,7 @@ noverifyrdeps=yes
 noshlibprovides=yes
 preserve=yes
 
-hostmakedepends="tar lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel
+hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel
  openssl-devel perl uboot-mkimage cpio clang llvm lld pahole python3 which"
 
 if [[ $version =~ ^[0-9]+\.[0-9]+$ ]]; then
