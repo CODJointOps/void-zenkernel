@@ -23,9 +23,9 @@ hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-deve
  openssl-devel perl uboot-mkimage cpio clang llvm lld pahole python3 which"
 
 if [[ $version =~ ^[0-9]+\.[0-9]+$ ]]; then
-    _kernver="${version}.0-zen${zen}_${revision}"
+    _kernver="${version}-lqx${lqx}_${revision}"
 else
-    _kernver="${version}-zen${zen}_${revision}"
+    _kernver="${version}-lqx${lqx}_${revision}"
 fi
 triggers="kernel-hooks"
 kernel_hooks_version="${_kernver}"
