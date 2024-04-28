@@ -1,14 +1,15 @@
 pkgname=linux6.8-zen
-version=6.8.7
+version=6.8.8
 revision=1
 zen=1
+lqx=1
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
-distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-zen${zen}.tar.gz"
-checksum="5ab6ad1d26925f02a74b41d485e5faf25056efec123d0a1433aa3a4108534aae"
+distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
+checksum="abf2bb8b3c81e809135d8b4d65c2e92df8a5eade7281ac3d4de506499c3128b2"
 python_version=3
 patch_args="-Np1"
 
