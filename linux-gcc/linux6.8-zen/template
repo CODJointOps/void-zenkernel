@@ -1,5 +1,5 @@
 pkgname=linux6.8-zen
-version=6.8.8
+version=6.8.9
 revision=1
 zen=1
 lqx=1
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="abf2bb8b3c81e809135d8b4d65c2e92df8a5eade7281ac3d4de506499c3128b2"
+checksum="41b4a0b5b2300c6368ea65e32c1e73b73284aaed25af203782edb6f213c8e8c1"
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 

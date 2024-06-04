@@ -1,27 +1,29 @@
-pkgname=linux6.8-zen
-version=6.8.9
+pkgname=linux6.9-zen
+version=6.9.3
 revision=1
 zen=1
 lqx=1
-wrksrc="linux-${version}-zen${zen}"
-short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
+python_version=3
+short_desc="Linux kernel and modules with Zen patches (${version%.*} series)"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
-homepage="http://www.zen-kernel.org/"
+homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="41b4a0b5b2300c6368ea65e32c1e73b73284aaed25af203782edb6f213c8e8c1"
-python_version=3
+checksum="20de8aa08c627fe62c4a6f30c1c9c395d91fbf63fc071b7570e5aeb99fef3e61"
+archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
-nodebug=yes  # -dbg package is generated below manually
+# Standard kernel template setup
+nodebug=yes
 nostrip=yes
 noverifyrdeps=yes
 noshlibprovides=yes
 preserve=yes
 
-hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel
- openssl-devel perl uboot-mkimage cpio clang llvm lld pahole python3 which"
+# Dependencies
+hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel openssl-devel perl uboot-mkimage cpio pahole python3"
 
+# This denotes the version for various hooks and scripts
 if [[ $version =~ ^[0-9]+\.[0-9]+$ ]]; then
     _kernver="${version}-lqx${lqx}_${revision}"
 else
@@ -30,7 +32,6 @@ fi
 triggers="kernel-hooks"
 kernel_hooks_version="${_kernver}"
 
-# These files could be modified when an external module is built.
 mutable_files="
  /usr/lib/modules/${_kernver}/modules.builtin.bin
  /usr/lib/modules/${_kernver}/modules.builtin.alias.bin
@@ -43,7 +44,6 @@ mutable_files="
  /usr/lib/modules/${_kernver}/modules.alias.bin
  /usr/lib/modules/${_kernver}/modules.devname"
 
-# reproducible build
 export KBUILD_BUILD_TIMESTAMP=${SOURCE_DATE_EPOCH:-0}
 export KBUILD_BUILD_USER=voidlinux
 export KBUILD_BUILD_HOST=zen
@@ -59,6 +59,7 @@ do_configure() {
 	# If there's a file called <arch>-dotconfig, use it to
 	# configure the kernel; otherwise use arch defaults and all stuff
 	# as modules (allmodconfig).
+
 	local arch subarch
 
 	case "$XBPS_TARGET_MACHINE" in
@@ -75,18 +76,18 @@ do_configure() {
 	if [ -f ${FILESDIR}/${subarch:-$arch}-dotconfig-custom ]; then
 		msg_normal "Detected a custom .config file for your arch, using it.\n"
 		cp -f ${FILESDIR}/${subarch:-$arch}-dotconfig-custom .config
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} oldconfig
+		make  ${makejobs} ARCH=$arch ${_args} oldconfig
 	elif [ -f ${FILESDIR}/${subarch:-$arch}-dotconfig ]; then
 		msg_normal "Detected a .config file for your arch, using it.\n"
 		cp -f ${FILESDIR}/${subarch:-$arch}-dotconfig .config
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} oldconfig
+		make  ${makejobs} ARCH=$arch ${_args} oldconfig
 	elif [ -f ${FILESDIR}/${XBPS_TARGET_MACHINE%%-musl}-dotconfig ]; then
 		msg_normal "Detected a .config file for your cpu family, using it.\n"
 		cp -f ${FILESDIR}/${XBPS_TARGET_MACHINE%%-musl}-dotconfig .config
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} oldconfig
+		make  ${makejobs} ARCH=$arch ${_args} oldconfig
 	else
 		msg_normal "Defaulting to 'allmodconfig'.\n"
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} allmodconfig
+		make  ${makejobs} ARCH=$arch ${_args} allmodconfig
 	fi
 	# Always use our revision to CONFIG_LOCALVERSION to match our pkg version.
 	sed -i -e "s|^\(CONFIG_LOCALVERSION=\).*|\1\"_${revision}\"|" .config
@@ -104,8 +105,8 @@ do_build() {
 		mips*) _args="uImage modules dtbs"; arch=mips;;
 	esac
 	export LDFLAGS=
-	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} prepare
-	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} ${_args}
+	make  ARCH=$arch ${_version} ${_cross} ${makejobs} prepare
+	make  ARCH=$arch ${_version} ${_cross} ${makejobs} ${_args}
 }
 
 do_install() {
@@ -124,7 +125,7 @@ do_install() {
 	sed -i '2iexit 0' scripts/depmod.sh
 
 	# Install kernel, firmware and modules
-	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_MOD_PATH=${DESTDIR} modules_install
+	make  ${makejobs} ARCH=${subarch:-$arch} INSTALL_MOD_PATH=${DESTDIR} modules_install
 
 	hdrdest=${DESTDIR}/usr/src/kernel-headers-${_kernver}
 
@@ -137,11 +138,11 @@ do_install() {
 			;;
 		arm)
 			vinstall arch/arm/boot/zImage 644 boot
-			make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
+			make  ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
 			;;
 		arm64)
 			vinstall arch/arm64/boot/Image 644 boot vmlinux-${_kernver}
-			make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
+			make  ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
 			;;
 		powerpc)
 			# zImage on powerpc is useless as it won't load initramfs
@@ -151,7 +152,7 @@ do_install() {
 			;;
 		mips)
 			vinstall arch/mips/boot/uImage.bin 644 boot uImage-${_kernver}
-			make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
+			make  ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
 			;;
 	esac
 
@@ -195,7 +196,7 @@ do_install() {
 	# if generated files from the scripts/ directory need to be included,
 	# they need to be copied to ${hdrdest} before this step
 	if [ "$CROSS_BUILD" ]; then
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} _mrproper_scripts
+		make  ${makejobs} ARCH=${subarch:-$arch} _mrproper_scripts
 		# remove host specific objects as well
 		find scripts -name '*.o' -delete
 	fi
@@ -302,7 +303,8 @@ do_install() {
 	# ... and run depmod again.
 	depmod -b ${DESTDIR}/usr -F System.map ${_kernver}
 }
-linux6.8-zen-headers_package() {
+
+linux6.9-zen-headers_package() {
 	preserve=yes
 	nostrip=yes
 	noshlibprovides=yes
@@ -312,7 +314,7 @@ linux6.8-zen-headers_package() {
 		vmove usr/lib/modules/${_kernver}/build
 	}
 }
-linux6.8-zen-dbg_package() {
+linux6.9-zen-dbg_package() {
 	preserve=yes
 	nostrip=yes
 	noverifyrdeps=yes
