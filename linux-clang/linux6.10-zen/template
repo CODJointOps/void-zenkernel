@@ -1,19 +1,19 @@
 pkgname=linux6.10-zen
-version=6.10.6
+version=6.10.10
 revision=1
 zen=1
-lqx=1
+lqx=2
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="f6e4bd83a6cf85bd6d584828eb21fa1ff7f79f9fbd2f9671c2e19abcfd1aa99b"
+checksum="da99959438dd3301ccf9dc939b77506fd234a923159f73c56703e612c11d711c"
 python_version=3
 patch_args="-Np1"
 
-nodebug=yes  # -dbg package is generated below manually
+nodebug=yes
 nostrip=yes
 noverifyrdeps=yes
 noshlibprovides=yes
@@ -30,7 +30,6 @@ fi
 triggers="kernel-hooks"
 kernel_hooks_version="${_kernver}"
 
-# These files could be modified when an external module is built.
 mutable_files="
  /usr/lib/modules/${_kernver}/modules.builtin.bin
  /usr/lib/modules/${_kernver}/modules.builtin.alias.bin
@@ -43,7 +42,6 @@ mutable_files="
  /usr/lib/modules/${_kernver}/modules.alias.bin
  /usr/lib/modules/${_kernver}/modules.devname"
 
-# reproducible build
 export KBUILD_BUILD_TIMESTAMP=${SOURCE_DATE_EPOCH:-0}
 export KBUILD_BUILD_USER=voidlinux
 export KBUILD_BUILD_HOST=zen
@@ -200,7 +198,6 @@ do_install() {
 		find scripts -name '*.o' -delete
 	fi
 
-	# Copy files necessary for later builds, like nvidia and vmware
 	cp Module.symvers ${hdrdest}
 	cp -a scripts ${hdrdest}
 	mkdir -p ${hdrdest}/security/selinux
@@ -236,25 +233,20 @@ do_install() {
 		cp -a drivers/media/i2c/${i}/*.h ${hdrdest}/drivers/media/i2c/${i}
 	done
 
-	# Add md headers
 	mkdir -p ${hdrdest}/drivers/md
 	cp drivers/md/*.h ${hdrdest}/drivers/md
 
-	# Add inotify.h
 	mkdir -p ${hdrdest}/include/linux
 	cp include/linux/inotify.h ${hdrdest}/include/linux
 
-	# Add wireless headers
 	mkdir -p ${hdrdest}/net/mac80211/
 	cp net/mac80211/*.h ${hdrdest}/net/mac80211
 
-	# add dvb headers for http://mcentral.de/hg/~mrec/em28xx-new
 	mkdir -p ${hdrdest}/drivers/media/dvb-frontends
 	cp drivers/media/dvb-frontends/lgdt330x.h \
 		${hdrdest}/drivers/media/dvb-frontends/
 	cp drivers/media/i2c/msp3400-driver.h ${hdrdest}/drivers/media/i2c/
 
-	# add dvb headers
 	mkdir -p ${hdrdest}/drivers/media/usb/dvb-usb
 	cp drivers/media/usb/dvb-usb/*.h ${hdrdest}/drivers/media/usb/dvb-usb/
 	mkdir -p ${hdrdest}/drivers/media/dvb-frontends
@@ -262,7 +254,6 @@ do_install() {
 	mkdir -p ${hdrdest}/drivers/media/tuners
 	cp drivers/media/tuners/*.h ${hdrdest}/drivers/media/tuners/
 
-	# Add xfs and shmem for aufs building
 	mkdir -p ${hdrdest}/fs/xfs/libxfs
 	mkdir -p ${hdrdest}/mm
 	cp fs/xfs/libxfs/xfs_sb.h ${hdrdest}/fs/xfs/libxfs/xfs_sb.h
@@ -275,7 +266,6 @@ do_install() {
 			;;
 	esac
 
-	# Remove unneeded architectures
 	case "$arch" in
 		i386|x86_64) _args="arm* m* p*";;
 		arm|arm64) _args="x86* m* p*";;
@@ -286,11 +276,9 @@ do_install() {
 		ia64 s* um v850 xtensa ${_args}; do
 		rm -rf ${hdrdest}/arch/${arch}
 	done
-	# Keep arch/x86/ras/Kconfig as it is needed by drivers/ras/Kconfig
 	mkdir -p ${hdrdest}/arch/x86/ras
 	cp -a arch/x86/ras/Kconfig ${hdrdest}/arch/x86/ras/Kconfig
 
-	# Extract debugging symbols and compress modules
 	msg_normal "$pkgver: extracting debug info and compressing modules, please wait...\n"
 	install -Dm644 vmlinux ${DESTDIR}/usr/lib/debug/boot/vmlinux-${_kernver}
 	(

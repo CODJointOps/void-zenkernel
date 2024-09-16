@@ -1,29 +1,26 @@
 pkgname=linux6.10-zen
-version=6.10.6
+version=6.10.10
 revision=1
 zen=1
-lqx=1
+lqx=2
 python_version=3
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series)"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="f6e4bd83a6cf85bd6d584828eb21fa1ff7f79f9fbd2f9671c2e19abcfd1aa99b"
+checksum="da99959438dd3301ccf9dc939b77506fd234a923159f73c56703e612c11d711c"
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
-# Standard kernel template setup
 nodebug=yes
 nostrip=yes
 noverifyrdeps=yes
 noshlibprovides=yes
 preserve=yes
 
-# Dependencies
 hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel openssl-devel perl uboot-mkimage cpio pahole python3"
 
-# This denotes the version for various hooks and scripts
 if [[ $version =~ ^[0-9]+\.[0-9]+$ ]]; then
     _kernver="${version}-lqx${lqx}_${revision}"
 else
@@ -121,10 +118,8 @@ do_install() {
 		mips*) arch=mips;;
 	esac
 
-	# Run depmod after compressing modules.
 	sed -i '2iexit 0' scripts/depmod.sh
 
-	# Install kernel, firmware and modules
 	make  ${makejobs} ARCH=${subarch:-$arch} INSTALL_MOD_PATH=${DESTDIR} modules_install
 
 	hdrdest=${DESTDIR}/usr/src/kernel-headers-${_kernver}
@@ -156,7 +151,6 @@ do_install() {
 			;;
 	esac
 
-	# Switch to /usr.
 	vmkdir usr
 	mv ${DESTDIR}/lib ${DESTDIR}/usr
 
@@ -165,7 +159,7 @@ do_install() {
 	ln -sf ../../../src/kernel-headers-${_kernver} build
 
 	cd ${wrksrc}
-	# Install required headers to build external modules
+
 	install -Dm644 Makefile ${hdrdest}/Makefile
 	install -Dm644 kernel/Makefile ${hdrdest}/kernel/Makefile
 	install -Dm644 .config ${hdrdest}/.config
@@ -201,7 +195,6 @@ do_install() {
 		find scripts -name '*.o' -delete
 	fi
 
-	# Copy files necessary for later builds, like nvidia and vmware
 	cp Module.symvers ${hdrdest}
 	cp -a scripts ${hdrdest}
 	mkdir -p ${hdrdest}/security/selinux
