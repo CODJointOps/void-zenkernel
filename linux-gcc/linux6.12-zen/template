@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="98e26562b9f31165d32bc798adeba91436a3ccdd7019f86e5445be1be4427ee8"
+checksum=abfcd13debfa33275fb30f90f43c6a06ad50e7b6f603512033e53f239bed7b41""
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
