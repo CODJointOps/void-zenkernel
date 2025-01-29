@@ -102,6 +102,18 @@ do_build() {
 		mips*) _args="uImage modules dtbs"; arch=mips;;
 	esac
 	export LDFLAGS=
+        
+	# TEMP TEMP TEMP TEMP
+	mkdir -p include/vdso
+	cat > include/vdso/page.h << EOF
+#ifndef __VDSO_PAGE_H
+#define __VDSO_PAGE_H
+
+#include <asm/page_types.h>
+
+#endif /* __VDSO_PAGE_H */
+EOF
+
 	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} prepare
 	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} ${_args}
 }
@@ -311,4 +323,3 @@ linux6.12-zen-dbg_package() {
 		vmove usr/lib/debug
 	}
 }
-
