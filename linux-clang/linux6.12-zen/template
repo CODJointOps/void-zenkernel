@@ -2,14 +2,14 @@ pkgname=linux6.12-zen
 version=6.12.11
 revision=1
 zen=1
-lqx=1
+lqx=2
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="9ec334c87b1e098a13bcb5ee7f4a21626f1aee65695e354a8472459813c28c33"
+checksum="a8b2f61ace510504c0e7457ff4df031bb5ee710f318ffdc4ade3e3b5c969d35a"
 python_version=3
 patch_args="-Np1"
 
@@ -102,18 +102,6 @@ do_build() {
 		mips*) _args="uImage modules dtbs"; arch=mips;;
 	esac
 	export LDFLAGS=
-        
-	# TEMP TEMP TEMP TEMP
-	mkdir -p include/vdso
-	cat > include/vdso/page.h << EOF
-#ifndef __VDSO_PAGE_H
-#define __VDSO_PAGE_H
-
-#include <asm/page_types.h>
-
-#endif /* __VDSO_PAGE_H */
-EOF
-
 	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} prepare
 	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} ${_args}
 }

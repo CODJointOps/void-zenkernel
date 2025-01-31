@@ -2,14 +2,14 @@ pkgname=linux6.12-zen
 version=6.12.11
 revision=1
 zen=1
-lqx=1
+lqx=2
 python_version=3
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series)"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="9ec334c87b1e098a13bcb5ee7f4a21626f1aee65695e354a8472459813c28c33"
+checksum="a8b2f61ace510504c0e7457ff4df031bb5ee710f318ffdc4ade3e3b5c969d35a"
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
@@ -280,11 +280,9 @@ do_install() {
 		ia64 s* um v850 xtensa ${_args}; do
 		rm -rf ${hdrdest}/arch/${arch}
 	done
-	# Keep arch/x86/ras/Kconfig as it is needed by drivers/ras/Kconfig
 	mkdir -p ${hdrdest}/arch/x86/ras
 	cp -a arch/x86/ras/Kconfig ${hdrdest}/arch/x86/ras/Kconfig
 
-	# Extract debugging symbols and compress modules
 	msg_normal "$pkgver: extracting debug info and compressing modules, please wait...\n"
 	install -Dm644 vmlinux ${DESTDIR}/usr/lib/debug/boot/vmlinux-${_kernver}
 	(
@@ -293,7 +291,6 @@ do_install() {
 	find ./ -name '*.ko' -print0 | \
 		xargs -0r -n1 -P ${XBPS_MAKEJOBS} ${FILESDIR}/mv-debug
 	)
-	# ... and run depmod again.
 	depmod -b ${DESTDIR}/usr -F System.map ${_kernver}
 }
 
@@ -318,4 +315,3 @@ linux6.12-zen-dbg_package() {
 		vmove usr/lib/debug
 	}
 }
-
