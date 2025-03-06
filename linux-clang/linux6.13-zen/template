@@ -1,15 +1,15 @@
 pkgname=linux6.13-zen
 version=6.13.5
-revision=1
+revision=2
 zen=1
-lqx=1
+lqx=2
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
-distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="00be3db3fc3ced3fef250fbe616c99916b2b45579665f891b1f2b443d903e44f"
+distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/heads/6.13/main.zip"
+checksum="25179c66d8da8f6885a4f86f3bf5609bebb39f1df52e10e6a6faabdfc2904c82"
 python_version=3
 patch_args="-Np1"
 
@@ -23,9 +23,9 @@ hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-deve
  openssl-devel perl uboot-mkimage cpio clang llvm lld pahole python3 which"
 
 if [[ $version =~ ^[0-9]+\.[0-9]+$ ]]; then
-    _kernver="${version}-lqx${lqx}_${revision}"
+    _kernver="${version}-zen_${revision}"
 else
-    _kernver="${version}-lqx${lqx}_${revision}"
+    _kernver="${version}-zen_${revision}"
 fi
 triggers="kernel-hooks"
 kernel_hooks_version="${_kernver}"
