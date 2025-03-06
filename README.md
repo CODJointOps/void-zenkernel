@@ -8,7 +8,7 @@
 Precompiled Zen Kernel packages are available through our repository. Add our repo and install with:
 
 ```bash
-echo "repository=http://deadzone.enterprises/repo/x86_64" | sudo tee /etc/xbps.d/10-deadzone.conf
+echo "repository=https://deadzone.enterprises/repo/x86_64" | sudo tee /etc/xbps.d/10-deadzone.conf
 sudo xbps-install -S linux6.13-zen linux6.13-zen-headers
 ```
 
