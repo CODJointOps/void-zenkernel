@@ -1,8 +1,16 @@
 # void-zenkernel
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Made with Love](https://img.shields.io/badge/Made%20with-%E2%9D%A4-red)
+
+## Precompiled binaries now available
+
+Precompiled Zen Kernel packages are available through our repository. Add our repo and install with:
+
+```bash
+echo "repository=http://deadzone.enterprises/repo/x86_64" | sudo tee /etc/xbps.d/10-deadzone.conf
+sudo xbps-install -S linux6.13-zen linux6.13-zen-headers
+```
 
 ## Description
 
