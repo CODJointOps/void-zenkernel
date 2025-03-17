@@ -2,7 +2,6 @@ pkgname=linux6.13-zen
 version=6.13.7
 revision=1
 lqx=2
-revision="${lqx}"
 zen=1
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"

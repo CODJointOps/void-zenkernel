@@ -2,7 +2,6 @@ pkgname=linux6.13-zen
 version=6.13.7
 revision=1
 lqx=2
-revision="${lqx}"
 zen=1
 wrksrc="linux-${version}-zen${zen}"
 python_version=3
