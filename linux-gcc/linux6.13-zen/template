@@ -1,6 +1,6 @@
 pkgname=linux6.13-zen
 version=6.13.8
-revision=1
+revision=2
 lqx=4
 zen=1
 wrksrc="linux-${version}-zen${zen}"
