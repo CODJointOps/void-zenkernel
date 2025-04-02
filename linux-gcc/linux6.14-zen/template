@@ -1,5 +1,5 @@
 pkgname=linux6.14-zen
-version=6.14
+version=6.14.0
 revision=1
 lqx=1
 zen=1
@@ -10,7 +10,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="70b23ad79a1270e4688e0c1426d6f3c43ebae9e2a57d3ecb67ee364a51079675"
+checksum="6d67e38fbff6c64c8d1425db772d69d083fb41f222d77c5dff3bba423ccc19a4"
 archs="x86_64* i686* ppc* aarch64*"
 patch_args="-Np1"
 
@@ -301,7 +301,7 @@ linux6.14-zen-headers_package() {
 		vmove usr/lib/modules/${_kernver}/build
 	}
 }
-linux6.14-zen-dbg_package() {
+linux6.14zen-dbg_package() {
 	preserve=yes
 	nostrip=yes
 	noverifyrdeps=yes
