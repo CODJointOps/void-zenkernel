@@ -1,5 +1,5 @@
 pkgname=linux6.14-zen
-version=6.14.1
+version=6.14.3
 revision=1
 lqx=1
 zen=1
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="651c3cfa2ddca4cc994b020c971b1812f79ccb2da7402cbdb65deaeffbfa7bd6"
+checksum="588c98ee9bd3a24c75e89b7c68fd7e822596c7c512de69ad1fb3d2b8d7c6b3c1"
 python_version=3
 patch_args="-Np1"
 
