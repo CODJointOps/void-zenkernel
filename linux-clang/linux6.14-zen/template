@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="42909870cdf01454ff4a6038377abce9f718bf05a6293b102c991bf1e46675c2"
+checksum="3e31563ac79559e4bc5de645dc205e82877578535ad9cdbf8abc71416f047aa9"
 python_version=3
 patch_args="-Np1"
 
