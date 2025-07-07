@@ -1,15 +1,15 @@
 pkgname=linux6.15-zen
-version=6.15.4
+version=6.15.5
 revision=1
 lqx=1
-zen=2
+zen=1
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum="f34a247182939c8b766a2ed056361eeff9695d3a25e7432b5e5e8b497235f2d4"
+checksum="74faac6f845319c9976fe4c4f226dd137380d44363ec75c85a11a86d05d4f1da"
 python_version=3
 patch_args="-Np1"
 
