@@ -22,7 +22,6 @@ jobs:
           echo "Fetching latest zen-kernel release..."
           RELEASES=$(curl -s https://api.github.com/repos/zen-kernel/zen-kernel/releases?per_page=50)
           
-          # Get the absolute latest stable release (format: v6.x.y-lqxN)
           LATEST_RELEASE=$(echo "$RELEASES" | jq -r '[.[] | select(.tag_name | test("^v\\d+\\.\\d+(\\.\\d+)?-lqx\\d+$"))] | sort_by(.published_at) | reverse | .[0]')
           
           if [ "$LATEST_RELEASE" = "null" ]; then
@@ -38,7 +37,6 @@ jobs:
           echo "Latest release: $TAG_NAME"
           echo "Version: $VERSION, LQX: $LQX, Version Key: $VERSION_KEY"
           
-          # Save to output
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "lqx=$LQX" >> $GITHUB_OUTPUT
@@ -60,10 +58,8 @@ jobs:
           
           echo "Processing latest release: $TAG_NAME (version=$VERSION, lqx=$LQX, version_key=$VERSION_KEY)"
           
-          # Use the GitHub archive URL format
           ARCHIVE_URL="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/${TAG_NAME}.tar.gz"
           
-          # Download and get checksum
           echo "Downloading $ARCHIVE_URL"
           if curl -sL "$ARCHIVE_URL" -o "zen-kernel-${VERSION}.tar.gz"; then
             CHECKSUM=$(sha256sum "zen-kernel-${VERSION}.tar.gz" | awk '{print $1}')
@@ -77,7 +73,6 @@ jobs:
           UPDATED_VERSIONS=""
           CHANGED_FILES=""
           
-          # Update both clang and gcc templates
           for compiler in clang gcc; do
             TEMPLATE_DIR="linux-${compiler}/linux${VERSION_KEY}-zen"
             TEMPLATE_FILE="$TEMPLATE_DIR/template"
@@ -85,7 +80,6 @@ jobs:
             if [ -f "$TEMPLATE_FILE" ]; then
               echo "Checking existing template: $TEMPLATE_FILE"
               
-              # Read current version from template
               CURRENT_VERSION=$(grep '^version=' "$TEMPLATE_FILE" 2>/dev/null | cut -d= -f2 || echo "")
               CURRENT_LQX=$(grep '^lqx=' "$TEMPLATE_FILE" 2>/dev/null | cut -d= -f2 || echo "")
               CURRENT_CHECKSUM=$(grep '^checksum=' "$TEMPLATE_FILE" 2>/dev/null | cut -d= -f2 || echo "")
@@ -93,20 +87,16 @@ jobs:
               echo "Current: version=$CURRENT_VERSION, lqx=$CURRENT_LQX"
               echo "New: version=$VERSION, lqx=$LQX"
               
-              # Check if update is needed (version, lqx, or checksum changed)
               if [ "$CURRENT_VERSION" != "$VERSION" ] || [ "$CURRENT_LQX" != "$LQX" ] || [ "$CURRENT_CHECKSUM" != "$CHECKSUM" ]; then
                 echo "Update needed for $TEMPLATE_FILE"
                 
-                # Update version, lqx, and checksum
                 sed -i "s/^version=.*/version=$VERSION/" "$TEMPLATE_FILE"
                 sed -i "s/^lqx=.*/lqx=$LQX/" "$TEMPLATE_FILE"
                 sed -i "s/^checksum=.*/checksum=$CHECKSUM/" "$TEMPLATE_FILE"
                 
-                # Reset revision to 1 for new versions, increment for same version
                 if [ "$CURRENT_VERSION" != "$VERSION" ] || [ "$CURRENT_LQX" != "$LQX" ]; then
                   sed -i "s/^revision=.*/revision=1/" "$TEMPLATE_FILE"
                 else
-                  # Just checksum changed, increment revision
                   CURRENT_REV=$(grep '^revision=' "$TEMPLATE_FILE" 2>/dev/null | cut -d= -f2 || echo "1")
                   NEW_REV=$((CURRENT_REV + 1))
                   sed -i "s/^revision=.*/revision=$NEW_REV/" "$TEMPLATE_FILE"
@@ -121,7 +111,6 @@ jobs:
             else
               echo "Template not found: $TEMPLATE_FILE - creating new template"
               
-              # Find the most recent template as reference
               REFERENCE_TEMPLATE=""
               REFERENCE_DIR=""
               if [ "$compiler" = "clang" ]; then
@@ -134,22 +123,18 @@ jobs:
                 REFERENCE_DIR=$(dirname "$REFERENCE_TEMPLATE")
                 echo "Using reference template directory: $REFERENCE_DIR"
                 
-                # Copy the entire reference directory structure
                 cp -r "$REFERENCE_DIR"/* "$TEMPLATE_DIR/"
                 echo "Copied files and patches from $REFERENCE_DIR to $TEMPLATE_DIR"
                 
-                # Update the new template
                 sed -i "s/^pkgname=.*/pkgname=linux${VERSION_KEY}-zen/" "$TEMPLATE_FILE"
                 sed -i "s/^version=.*/version=$VERSION/" "$TEMPLATE_FILE"
                 sed -i "s/^lqx=.*/lqx=$LQX/" "$TEMPLATE_FILE"
                 sed -i "s/^checksum=.*/checksum=$CHECKSUM/" "$TEMPLATE_FILE"
                 sed -i "s/^revision=.*/revision=1/" "$TEMPLATE_FILE"
                 
-                # Update package function names in the template
                 sed -i "s/linux[0-9.]*-zen-headers_package/linux${VERSION_KEY}-zen-headers_package/g" "$TEMPLATE_FILE"
                 sed -i "s/linux[0-9.]*-zen-dbg_package/linux${VERSION_KEY}-zen-dbg_package/g" "$TEMPLATE_FILE"
                 
-                # Create symlinks for headers and dbg variants
                 HEADERS_DIR="linux-${compiler}/linux${VERSION_KEY}-zen-headers"
                 DBG_DIR="linux-${compiler}/linux${VERSION_KEY}-zen-dbg"
                 
@@ -177,16 +162,16 @@ jobs:
           echo "Updated versions: $UPDATED_VERSIONS"
           echo "Changed files: $CHANGED_FILES"
           
-      - name: Commit and Push Changes
+       - name: Commit and Push Changes
         run: |
           UPDATED="${{ steps.update_templates.outputs.updated_versions }}"
           CHANGED_FILES="${{ steps.update_templates.outputs.changed_files }}"
-          
+          TAG_NAME="${{ steps.get_release.outputs.tag_name }}"
+         
           if [ -n "$UPDATED" ] && [ -n "$CHANGED_FILES" ]; then
             git config user.name "Wizzard"
             git config user.email "rich@bandaholics.cash"
-            
-            # Add only the specific files/directories that were changed
+           
             echo "Adding changed files: $CHANGED_FILES"
             for item in $CHANGED_FILES; do
               if [ -f "$item" ] || [ -d "$item" ]; then
@@ -196,29 +181,26 @@ jobs:
                 echo "Warning: Item not found: $item"
               fi
             done
-            
-            # Also add any new symlinks that were created
+           
             if echo "$UPDATED" | grep -q "new"; then
               git add linux-clang/*-zen-headers linux-clang/*-zen-dbg linux-gcc/*-zen-headers linux-gcc/*-zen-dbg 2>/dev/null || true
               echo "Added symlinks for new templates"
             fi
-            
-            # Check if there are actually changes to commit
+           
             if git diff --cached --quiet; then
               echo "No changes to commit"
               exit 0
             fi
-            
-            # Create simple commit message
+           
             if echo "$UPDATED" | grep -q "new"; then
               NEW_TEMPLATES=$(echo "$UPDATED" | tr ' ' '\n' | grep 'new' | sed 's/-new$//' | tr '\n' ' ')
-              git commit -m "Add zen kernel templates for $NEW_TEMPLATES [auto]"
+              git commit -m "Add zen kernel templates for $NEW_TEMPLATES at $TAG_NAME [auto]"
             else
-              git commit -m "Update zen kernel templates: $UPDATED [auto]"
+              git commit -m "Update zen kernel templates to $TAG_NAME: $UPDATED [auto]"
             fi
-            
+           
             git push
-            
+           
             echo "Changes committed and pushed"
           else
             echo "No updates needed"
