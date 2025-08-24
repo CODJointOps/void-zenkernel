@@ -94,6 +94,7 @@ jobs:
               if [ -n "$REFERENCE_TEMPLATE" ] && [ -f "$REFERENCE_TEMPLATE" ]; then
                 REFERENCE_DIR=$(dirname "$REFERENCE_TEMPLATE")
                 echo "Using reference template directory: $REFERENCE_DIR"
+                mkdir -p "$TEMPLATE_DIR"
                 cp -r "$REFERENCE_DIR"/* "$TEMPLATE_DIR/"
                 echo "Copied files and patches from $REFERENCE_DIR to $TEMPLATE_DIR"
                 sed -i "s/^pkgname=.*/pkgname=linux${VERSION_KEY}-zen/" "$TEMPLATE_FILE"
