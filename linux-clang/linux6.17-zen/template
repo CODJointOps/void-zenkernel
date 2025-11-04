@@ -1,5 +1,5 @@
 pkgname=linux6.17-zen
-version=6.17.6
+version=6.17.7
 revision=1
 lqx=1
 zen=1
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum=e737ebf9774c026315e3ee9739b471133a9f89365414cf272a888aaa0ab0a84b
+checksum=9ea6e3a356b3658d94c58eb0035e3a2784b5ccebe46028f19f27652880cce38d
 python_version=3
 patch_args="-Np1"
 
