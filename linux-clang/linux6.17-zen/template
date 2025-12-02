@@ -1,7 +1,7 @@
 pkgname=linux6.17-zen
-version=6.17.9
+version=6.17.10
 revision=1
-lqx=2
+lqx=1
 zen=1
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum=113f9dfca224ef5082e4f0317389b19484a4a29d6c8571b3bc19cfb481784036
+checksum=605d08e933626adbfea09996ef12373acac9debec98a7b5cd6612c2d13c19d7b
 python_version=3
 patch_args="-Np1"
 
