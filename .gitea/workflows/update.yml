@@ -69,9 +69,11 @@ jobs:
                 sed -i "s/^version=.*/version=$VERSION/" "$TEMPLATE_FILE"
                 sed -i "s/^lqx=.*/lqx=$LQX/" "$TEMPLATE_FILE"
                 sed -i "s/^checksum=.*/checksum=$CHECKSUM/" "$TEMPLATE_FILE"
-                if [ "$CURRENT_VERSION" != "$VERSION" ] || [ "$CURRENT_LQX" != "$LQX" ]; then
+                if [ "$CURRENT_VERSION" != "$VERSION" ]; then
+                  # New kernel version → reset to revision=1
                   sed -i "s/^revision=.*/revision=1/" "$TEMPLATE_FILE"
-                else
+                elif [ "$CURRENT_LQX" != "$LQX" ] || [ "$CURRENT_CHECKSUM" != "$CHECKSUM" ]; then
+                  # Same version, new LQX or checksum → increment revision
                   CURRENT_REV=$(grep '^revision=' "$TEMPLATE_FILE" 2>/dev/null | cut -d= -f2 || echo "1")
                   NEW_REV=$((CURRENT_REV + 1))
                   sed -i "s/^revision=.*/revision=$NEW_REV/" "$TEMPLATE_FILE"
