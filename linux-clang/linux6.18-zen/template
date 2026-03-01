@@ -1,5 +1,5 @@
 pkgname=linux6.18-zen
-version=6.18.13
+version=6.18.15
 revision=1
 lqx=1
 zen=1
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum=84c15e3d9834a22627ba40677bf85d0374a066674fecec0d6d0ad9e5645f35a4
+checksum=74f4abddd9cfef32533f0831ff37411b84f1d9becadc825a231137d60daf3f5d
 python_version=3
 patch_args="-Np1"
 
