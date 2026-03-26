@@ -1,5 +1,5 @@
 pkgname=linux6.19-zen
-version=6.19.9
+version=6.19.10
 revision=1
 lqx=1
 zen=1
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum=bf417e0b397b95c2f1488ee5665d40d0cca68cb8829d579a062c5fca25865345
+checksum=93cbca2ab1dba97a8ff2d2ec8faeb2c6cc81bc39fc2465203672a40a91f94882
 python_version=3
 patch_args="-Np1"
 
