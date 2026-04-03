@@ -1,6 +1,6 @@
 pkgname=linux6.19-zen
 version=6.19.10
-revision=2
+revision=3
 lqx=2
 zen=1
 wrksrc="linux-${version}-zen${zen}"
