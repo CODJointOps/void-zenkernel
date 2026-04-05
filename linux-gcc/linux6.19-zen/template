@@ -1,7 +1,7 @@
 pkgname=linux6.19-zen
 version=6.19.11
-revision=1
-lqx=1
+revision=2
+lqx=2
 zen=1
 wrksrc="linux-${version}-zen${zen}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
@@ -9,7 +9,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum=c404a41003c3209022e080bb5d3ba08481dae1ac20d15d914a2bbc5245f48c42
+checksum=4a9c6a5cddc4138cbdb1344eced9931d28a75aab44651094568dde98734b562b
 python_version=3
 patch_args="-Np1"
 
