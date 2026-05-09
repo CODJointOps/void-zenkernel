@@ -1,15 +1,17 @@
+# Template file for 'linux7.0-zen'
 pkgname=linux7.0-zen
-version=7.0.4
+version=7.0.5
 revision=1
-lqx=2
-zen=1
-wrksrc="linux-${version}-zen${zen}"
-short_desc="Linux kernel and modules with Zen patches (${version%.*} series) compiled with Clang"
+archs="x86_64* i686* ppc* aarch64*"
+_lqx=2
+create_wrksrc=yes
+build_wrksrc="zen-kernel-${version}-lqx${_lqx}"
+short_desc="Linux kernel and modules with Zen patches (${version%.*} series)"
 maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
-homepage="http://www.zen-kernel.org/"
-distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${lqx}.tar.gz"
-checksum=5a8367f03620faedfb43a556ffd73778c4b8d2593e0f5d23bc31552b5898bfd9
+homepage="https://github.com/zen-kernel/zen-kernel"
+distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"
+checksum=86934518375854e549fff4a63339914b29c9379f67457eaa1fd6268fd43c13f7
 python_version=3
 patch_args="-Np1"
 
@@ -19,10 +21,10 @@ noverifyrdeps=yes
 noshlibprovides=yes
 preserve=yes
 
-hostmakedepends="tar xz lz4 bc-gh elfutils-devel flex gmp-devel kmod libmpc-devel
- openssl-devel perl uboot-mkimage cpio clang llvm lld pahole python3 which"
+hostmakedepends="tar xz bc elfutils-devel flex gmp-devel kmod libmpc-devel
+ pkg-config openssl-devel perl uboot-mkimage cpio pahole python3 zstd"
 
-_kernver="${version}-lqx${lqx}_${revision}"
+_kernver="${version}-lqx${_lqx}_${revision}"
 triggers="kernel-hooks"
 kernel_hooks_version="${_kernver}"
 
@@ -38,7 +40,7 @@ mutable_files="
  /usr/lib/modules/${_kernver}/modules.alias.bin
  /usr/lib/modules/${_kernver}/modules.devname"
 
-export KBUILD_BUILD_TIMESTAMP=${SOURCE_DATE_EPOCH:-0}
+export KBUILD_BUILD_TIMESTAMP=$(LC_ALL=C date -ud @${SOURCE_DATE_EPOCH:-0})
 export KBUILD_BUILD_USER=voidlinux
 export KBUILD_BUILD_HOST=zen
 
@@ -48,6 +50,11 @@ fi
 if [ "${_patchver}" ]; then
 	_version="EXTRAVERSION=${_patchver}"
 fi
+
+post_patch() {
+	vsed -e "s|\$(STRIP) \(--strip-debug -o \$@ \$<;\)|/usr/bin/${STRIP} \1|" -i drivers/firmware/efi/libstub/Makefile
+	vsed -i "s/\(\$(pahole-flags-y)\)/\1 --jobs=1/" -i scripts/Makefile.btf
+}
 
 do_configure() {
 	# If there's a file called <arch>-dotconfig, use it to
@@ -69,25 +76,25 @@ do_configure() {
 	if [ -f ${FILESDIR}/${subarch:-$arch}-dotconfig-custom ]; then
 		msg_normal "Detected a custom .config file for your arch, using it.\n"
 		cp -f ${FILESDIR}/${subarch:-$arch}-dotconfig-custom .config
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} oldconfig
+		make ${makejobs} ARCH=$arch ${_cross} oldconfig
 	elif [ -f ${FILESDIR}/${subarch:-$arch}-dotconfig ]; then
 		msg_normal "Detected a .config file for your arch, using it.\n"
 		cp -f ${FILESDIR}/${subarch:-$arch}-dotconfig .config
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} oldconfig
+		make ${makejobs} ARCH=$arch ${_cross} oldconfig
 	elif [ -f ${FILESDIR}/${XBPS_TARGET_MACHINE%%-musl}-dotconfig ]; then
 		msg_normal "Detected a .config file for your cpu family, using it.\n"
 		cp -f ${FILESDIR}/${XBPS_TARGET_MACHINE%%-musl}-dotconfig .config
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} oldconfig
+		make ${makejobs} ARCH=$arch ${_cross} oldconfig
 	else
 		msg_normal "Defaulting to 'allmodconfig'.\n"
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=$arch ${_args} allmodconfig
+		make ${makejobs} ARCH=$arch ${_cross} allmodconfig
 	fi
 	# Always use our revision to CONFIG_LOCALVERSION to match our pkg version.
 	sed -i -e "s|^\(CONFIG_LOCALVERSION=\).*|\1\"_${revision}\"|" .config
 }
 
 do_build() {
-	local arch _cross _args
+	local arch _args
 
 	case "$XBPS_TARGET_MACHINE" in
 		i686*) _args="bzImage modules"; arch=i386;;
@@ -98,12 +105,14 @@ do_build() {
 		mips*) _args="uImage modules dtbs"; arch=mips;;
 	esac
 	export LDFLAGS=
-	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} prepare
-	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ARCH=$arch ${_version} ${_cross} ${makejobs} ${_args}
+	make ARCH=$arch ${_version} ${_cross} ${makejobs} prepare
+	make ARCH=$arch ${_version} ${_cross} ${makejobs} ${_args}
 }
 
 do_install() {
-	local arch subarch _args hdrdest
+	local arch subarch _args hdrdest srcdir
+
+	srcdir=$PWD
 
 	case "$XBPS_TARGET_MACHINE" in
 		i686*) arch=x86; subarch=i386;;
@@ -114,11 +123,13 @@ do_install() {
 		mips*) arch=mips;;
 	esac
 
-	# Run depmod after compressing modules.
+	# Run depmod after compressing modules - makes depmod.sh a noop.
 	sed -i '2iexit 0' scripts/depmod.sh
+	vmkdir usr/lib
+	ln -sf usr/lib/ ${DESTDIR}
 
 	# Install kernel, firmware and modules
-	make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_MOD_PATH=${DESTDIR} modules_install
+	make ${makejobs} ARCH=${subarch:-$arch} INSTALL_MOD_PATH=${DESTDIR} ${_cross} modules_install
 
 	hdrdest=${DESTDIR}/usr/src/kernel-headers-${_kernver}
 
@@ -131,11 +142,11 @@ do_install() {
 			;;
 		arm)
 			vinstall arch/arm/boot/zImage 644 boot
-			make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
+			make ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} ${_cross} dtbs_install
 			;;
 		arm64)
 			vinstall arch/arm64/boot/Image 644 boot vmlinux-${_kernver}
-			make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
+			make ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} ${_cross} dtbs_install
 			;;
 		powerpc)
 			# zImage on powerpc is useless as it won't load initramfs
@@ -145,28 +156,28 @@ do_install() {
 			;;
 		mips)
 			vinstall arch/mips/boot/uImage.bin 644 boot uImage-${_kernver}
-			make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} dtbs_install
+			make ${makejobs} ARCH=${subarch:-$arch} INSTALL_DTBS_PATH=${DESTDIR}/boot/dtbs/dtbs-${_kernver} ${_cross} dtbs_install
 			;;
 	esac
 
 	# Switch to /usr.
 	vmkdir usr
-	mv ${DESTDIR}/lib ${DESTDIR}/usr
 
 	cd ${DESTDIR}/usr/lib/modules/${_kernver}
 	rm -f source build
 	ln -sf ../../../src/kernel-headers-${_kernver} build
 
-	cd ${wrksrc}
+	cd "${srcdir}"
 	# Install required headers to build external modules
 	install -Dm644 Makefile ${hdrdest}/Makefile
+	install -Dm644 Kbuild ${hdrdest}/Kbuild
 	install -Dm644 kernel/Makefile ${hdrdest}/kernel/Makefile
 	install -Dm644 .config ${hdrdest}/.config
 	for file in $(find . -name Kconfig\*); do
 		mkdir -p ${hdrdest}/$(dirname $file)
 		install -Dm644 $file ${hdrdest}/${file}
 	done
-	for file in $(find arch/${subarch:-$arch} -name module.lds -o -name Kbuild.platforms -o -name Platform); do
+	for file in $(find arch/${subarch:-$arch} scripts -name module.lds -o -name Kbuild.platforms -o -name Platform); do
 		mkdir -p ${hdrdest}/$(dirname $file)
 		install -Dm644 $file ${hdrdest}/${file}
 	done
@@ -174,22 +185,25 @@ do_install() {
 	# Remove firmware stuff provided by the "linux-firmware" pkg.
 	rm -rf ${DESTDIR}/usr/lib/firmware
 
-	for i in acpi asm-generic clocksource config crypto drm generated hyperv linux vdso \
+	for i in acpi asm-generic clocksource config crypto drm generated hyperv keys linux vdso \
 		math-emu media net pcmcia scsi sound trace uapi video xen dt-bindings; do
 		if [ -d include/$i ]; then
 			cp -a include/$i ${hdrdest}/include
 		fi
 	done
 
-	cd ${wrksrc}
+	cd "${srcdir}"
 	mkdir -p ${hdrdest}/arch/${arch}
 	cp -a arch/${arch}/include ${hdrdest}/arch/${arch}
+
+	# Needed by mv-debug after modules have been stripped.
+	cp scripts/sign-file "${XBPS_WRAPPERDIR}"
 
 	# Remove helper binaries built for host,
 	# if generated files from the scripts/ directory need to be included,
 	# they need to be copied to ${hdrdest} before this step
 	if [ "$CROSS_BUILD" ]; then
-		make CC=clang AS=clang LD=ld.lld AR=llvm-ar NM=llvm-nm STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump HOSTCC=clang HOSTLD=ld.lld HOSTAR=llvm-ar ${makejobs} ARCH=${subarch:-$arch} _mrproper_scripts
+		make ${makejobs} ARCH=${subarch:-$arch} ${_cross} _mrproper_scripts
 		# remove host specific objects as well
 		find scripts -name '*.o' -delete
 	fi
@@ -200,6 +214,13 @@ do_install() {
 	cp -a security/selinux/include ${hdrdest}/security/selinux
 	mkdir -p ${hdrdest}/tools/include
 	cp -a tools/include/tools ${hdrdest}/tools/include
+	if [ -d "arch/${arch}/tools" ]; then
+		cp -a "arch/${arch}/tools" "${hdrdest}/arch/${arch}"
+	fi
+	cp -a kernel/time/timeconst.bc "${hdrdest}/kernel/time"
+	cp -a kernel/bounds.c "${hdrdest}/kernel"
+	mkdir -p "${hdrdest}/arch/x86/entry/syscalls"
+	cp -a arch/x86/entry/syscalls/syscall_32.tbl "${hdrdest}/arch/x86/entry/syscalls"
 
 	mkdir -p ${hdrdest}/arch/${arch}/kernel
 	cp arch/${arch}/Makefile ${hdrdest}/arch/${arch}
@@ -212,6 +233,7 @@ do_install() {
 		cp arch/x86/kernel/asm-offsets.s ${hdrdest}/arch/x86/kernel
 	elif [ "$arch" = "arm64" ]; then
 		mkdir -p ${hdrdest}/arch/arm64/kernel
+		cp arch/arm64/kernel/asm-offsets.s ${hdrdest}/arch/arm64/kernel
 		cp -a arch/arm64/kernel/vdso ${hdrdest}/arch/arm64/kernel/
 	fi
 
@@ -219,11 +241,11 @@ do_install() {
 	mkdir -p ${hdrdest}/drivers
 	cp -a drivers/md ${hdrdest}/drivers/ 2>/dev/null || true
 	cp -a drivers/media ${hdrdest}/drivers/ 2>/dev/null || true
-	
+
 	# Copy networking headers
 	mkdir -p ${hdrdest}/net
 	cp -a net/mac80211 ${hdrdest}/net/ 2>/dev/null || true
-	
+
 	# Copy filesystem headers for external filesystems (e.g., aufs)
 	mkdir -p ${hdrdest}/fs
 	cp -a fs/xfs ${hdrdest}/fs/ 2>/dev/null || true
@@ -237,7 +259,7 @@ do_install() {
 	esac
 
 	case "$arch" in
-		i386|x86_64) _args="arm* m* p*";;
+		x86) _args="arm* m* p*";;
 		arm|arm64) _args="x86* m* p*";;
 		powerpc) _args="arm* m* x86* parisc";;
 		mips) _args="arm* x86* p*";;
@@ -254,11 +276,13 @@ do_install() {
 	(
 	cd ${DESTDIR}
 	export DESTDIR
+	export SIGN_FILE="${XBPS_WRAPPERDIR}/sign-file sha512 ${srcdir}/certs/signing_key.pem ${srcdir}/certs/signing_key.x509"
 	find ./ -name '*.ko' -print0 | \
 		xargs -0r -n1 -P ${XBPS_MAKEJOBS} ${FILESDIR}/mv-debug
 	)
 	# ... and run depmod again.
 	depmod -b ${DESTDIR}/usr -F System.map ${_kernver}
+	rm -f ${DESTDIR}/lib
 }
 linux7.0-zen-headers_package() {
 	preserve=yes
