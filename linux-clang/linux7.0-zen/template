@@ -1,9 +1,9 @@
 # Template file for 'linux7.0-zen'
 pkgname=linux7.0-zen
-version=7.0.13
+version=7.0.14
 revision=1
 archs="x86_64* i686* ppc* aarch64*"
-_lqx=3
+_lqx=1
 create_wrksrc=yes
 build_wrksrc="zen-kernel-${version}-lqx${_lqx}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series, Clang)"
@@ -11,7 +11,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"
-checksum=6a1c4aaff1ccc33074b43c231c71138c4b154273bdaa39424a63062159c7711e
+checksum=c347e0b5f3d1b1dae7612b21e932ee44be811d5989c5c7e65581a66a1f027784
 python_version=3
 patch_args="-Np1"
 
