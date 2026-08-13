@@ -1,6 +1,6 @@
 # Template file for 'linux7.0-zen'
 pkgname=linux7.1-zen
-version=7.1.6
+version=7.1.8
 revision=1
 archs="x86_64* i686* ppc* aarch64*"
 _lqx=2
@@ -11,7 +11,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"
-checksum=6bfc1b737ed78ef04cb2bd1190b1f56c38af8e9d3f739b549320fd11afbb7dbd
+checksum=df8e0221f555f7ca5fd248310077c431eab013307579813b70d3118e43f3df38
 python_version=3
 patch_args="-Np1"
 
