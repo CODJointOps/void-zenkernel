@@ -3,7 +3,7 @@ pkgname=linux7.2-zen
 version=7.2.2
 revision=1
 archs="x86_64* i686* ppc* aarch64*"
-_lqx=1
+_lqx=2
 create_wrksrc=yes
 build_wrksrc="zen-kernel-${version}-lqx${_lqx}"
 short_desc="Linux kernel and modules with Zen patches (${version%.*} series, Clang)"
@@ -11,7 +11,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="http://www.zen-kernel.org/"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"
-checksum=169bae0b74db6695659c1a523aeb276a72162834066b4fefd450b63ef4399c92
+checksum=0871fff5190ad9caa406bd8940dd5e2646797d95261c6a916209d07f799bd4cf
 python_version=3
 patch_args="-Np1"
 
