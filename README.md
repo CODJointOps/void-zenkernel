@@ -1,20 +1,38 @@
 # void-zenkernel
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Made with Love](https://img.shields.io/badge/Made%20with-%E2%9D%A4-red)
+xbps-src templates for the Zen kernel (Liquorix `lqx` tags) on Void Linux, x86_64.
 
-## Description
+## Layout
 
-`void-zenkernel` is a collection of packages that allow users to build the Zen Kernel for Void Linux using either GCC or Clang compilers. The Zen Kernel is known for its performance tweaks and smoother system performance. With `void-zenkernel`, Void Linux users can easily harness the power of Zen!
+```
+srcpkgs/linuxX.Y-zen/           one package per kernel series, current and previous only
+  template                      the source; hand-edited
+  files/x86_64-dotconfig        generated: Void base + zen + clang fragments
+  files/x86_64-dotconfig-gcc    generated: Void base + zen + gcc fragments
+fragments/                      the only hand-edited config input
+scripts/                        updater and config gate, POSIX sh
+```
 
-## Features
+Clang with ThinLTO is the default. `gcc` is the build option `~clang` on the same package.
 
-- Seamless integration with Void Linux.
-- Support for both GCC and Clang compilers.
-- Regular updates and patches to ensure the best performance.
+## Build
 
-## Requirements
+Clone this repo inside your void-packages checkout and link the packages in:
 
-- Void Linux distribution.
-- Development tools (base-devel) installed.
-- Either GCC or Clang compiler.
+```sh
+cd ~/gitprojects/void-packages
+git clone https://git.deadzone.lol/Wizzard/void-zenkernel zen
+ln -s ../zen/srcpkgs/linux7.2-zen srcpkgs/
+ln -s linux7.2-zen srcpkgs/linux7.2-zen-headers
+ln -s linux7.2-zen srcpkgs/linux7.2-zen-dbg
+./xbps-src pkg linux7.2-zen              # clang, ThinLTO
+./xbps-src -o '~clang' pkg linux7.2-zen  # gcc
+```
+
+The clone must live inside void-packages: the build chroot only sees that tree.
+
+## Updates
+
+`.gitea/workflows/update.yml` runs `scripts/update.sh` daily. On a new `lqx` tag it bumps the
+template, regenerates both configs from Void's `linuxX.Y` base plus `fragments/`, fails if any
+fragment line is dropped, and commits.
