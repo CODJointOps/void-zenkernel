@@ -35,4 +35,6 @@ The clone must live inside void-packages: the build chroot only sees that tree.
 
 `.gitea/workflows/update.yml` runs `scripts/update.sh` daily. On a new `lqx` tag it bumps the
 template, regenerates both configs from Void's `linuxX.Y` base plus `fragments/`, fails if any
-fragment line is dropped, and commits.
+fragment line is dropped, and commits. It also re-converges the configs daily when Void's base
+moves. Hand runs (`scripts/update.sh` without `-c`) are for inspection: the toolchain probe lines
+(`CONFIG_CC_VERSION_TEXT` and friends) depend on the host compiler, so CI is what commits.

@@ -1,4 +1,4 @@
-name: Auto Update Zen Kernel Templates
+name: Update zen kernel
 
 on:
   schedule:
@@ -8,278 +8,45 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: update-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  update-kernel:
+  update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: https://github.com/actions/checkout@v4
+      - uses: https://github.com/actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITEA_TOKEN }}
 
-      - name: Install dependencies
+      - name: Install toolchain
         run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ca-certificates coreutils curl git
+          set -eu
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            flex bison bc libelf-dev libssl-dev clang lld llvm dwarves shellcheck
+          sudo curl -fsSL -o /usr/local/bin/xlint https://raw.githubusercontent.com/void-linux/xtools/master/xlint
+          sudo chmod +x /usr/local/bin/xlint
 
-      - name: Fetch latest Zen lqx tag
-        id: get_release
+      - name: Lint scripts
+        run: shellcheck scripts/*.sh
+
+      - name: Update
         run: |
-          set -euo pipefail
-
-          tags=$(
-            git ls-remote --tags https://github.com/zen-kernel/zen-kernel.git 'refs/tags/v*-lqx*' |
-              awk '{print $2}' |
-              sed -E 's#^refs/tags/##; s#\^\{\}$##' |
-              grep -E '^v[0-9]+\.[0-9]+(\.[0-9]+)?-lqx[0-9]+$' |
-              sort -uV || true
-          )
-
-          if [ -z "$tags" ]; then
-            echo "No lqx tags found"
-            exit 1
-          fi
-
-          tag_name=$(printf '%s\n' "$tags" | tail -n 1)
-          version=$(printf '%s' "$tag_name" | sed -E 's/^v([0-9.]+)-lqx[0-9]+$/\1/')
-          lqx=$(printf '%s' "$tag_name" | sed -E 's/^v[0-9.]+-lqx([0-9]+)$/\1/')
-          version_key=$(printf '%s' "$version" | sed -E 's/^([0-9]+\.[0-9]+).*/\1/')
-          archive_url="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/${tag_name}.tar.gz"
-          archive="zen-kernel-${version}-lqx${lqx}.tar.gz"
-
-          curl -fsSL "$archive_url" -o "$archive"
-          checksum=$(sha256sum "$archive" | awk '{print $1}')
-          archive_root=$(tar -tzf "$archive" | sed -n '1s#/$##p')
-          rm -f "$archive"
-          expected_archive_root="zen-kernel-${version}-lqx${lqx}"
-
-          if [ "$archive_root" != "$expected_archive_root" ]; then
-            echo "Archive root changed: expected $expected_archive_root, got $archive_root"
-            exit 1
-          fi
-
-          echo "Latest tag: $tag_name"
-          echo "Version: $version"
-          echo "LQX: $lqx"
-          echo "Series: $version_key"
-          echo "Archive root: $archive_root"
-          echo "Checksum: $checksum"
-
-          {
-            echo "tag_name=$tag_name"
-            echo "version=$version"
-            echo "lqx=$lqx"
-            echo "version_key=$version_key"
-            echo "archive_root=$archive_root"
-            echo "checksum=$checksum"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Update templates
-        id: update_templates
-        run: |
-          set -euo pipefail
-
-          TAG_NAME="${{ steps.get_release.outputs.tag_name }}"
-          VERSION="${{ steps.get_release.outputs.version }}"
-          LQX="${{ steps.get_release.outputs.lqx }}"
-          VERSION_KEY="${{ steps.get_release.outputs.version_key }}"
-          ARCHIVE_ROOT="${{ steps.get_release.outputs.archive_root }}"
-          CHECKSUM="${{ steps.get_release.outputs.checksum }}"
-
-          UPDATED=""
-          CHANGED_FILES=""
-
-          get_assignment() {
-            awk -F= -v key="$2" '$1 == key {gsub(/"/, "", $2); print $2; exit}' "$1"
-          }
-
-          current_lqx() {
-            awk -F= '$1 == "_lqx" || $1 == "lqx" {gsub(/"/, "", $2); print $2; exit}' "$1"
-          }
-
-          current_wrksrc() {
-            awk -F= '$1 == "build_wrksrc" || $1 == "wrksrc" {gsub(/"/, "", $2); print $2; exit}' "$1"
-          }
-
-          normalize_template() {
-            template_file="$1"
-
-            sed -i "s/^pkgname=.*/pkgname=linux${VERSION_KEY}-zen/" "$template_file"
-            sed -i "s/^version=.*/version=${VERSION}/" "$template_file"
-            sed -i "s/^revision=.*/revision=1/" "$template_file"
-            sed -i "s/^checksum=.*/checksum=${CHECKSUM}/" "$template_file"
-            sed -i 's#^distfiles=.*#distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"#' "$template_file"
-
-            sed -i '/^zen=/d' "$template_file"
-            if grep -q '^_lqx=' "$template_file"; then
-              sed -i "s/^_lqx=.*/_lqx=${LQX}/" "$template_file"
-            elif grep -q '^lqx=' "$template_file"; then
-              sed -i "s/^lqx=.*/_lqx=${LQX}/" "$template_file"
-            else
-              sed -i "/^archs=/a _lqx=${LQX}" "$template_file"
-            fi
-
-            if grep -q '^create_wrksrc=' "$template_file"; then
-              sed -i 's/^create_wrksrc=.*/create_wrksrc=yes/' "$template_file"
-            else
-              sed -i '/^_lqx=/a create_wrksrc=yes' "$template_file"
-            fi
-
-            if grep -q '^build_wrksrc=' "$template_file"; then
-              sed -i 's#^build_wrksrc=.*#build_wrksrc="zen-kernel-${version}-lqx${_lqx}"#' "$template_file"
-            elif grep -q '^wrksrc=' "$template_file"; then
-              sed -i '/^wrksrc=/c build_wrksrc="zen-kernel-${version}-lqx${_lqx}"' "$template_file"
-            else
-              sed -i '/^create_wrksrc=/a build_wrksrc="zen-kernel-${version}-lqx${_lqx}"' "$template_file"
-            fi
-
-            sed -i -E "s/linux[0-9.]+-zen-headers_package/linux${VERSION_KEY}-zen-headers_package/g" "$template_file"
-            sed -i -E "s/linux[0-9.]+-zen-dbg_package/linux${VERSION_KEY}-zen-dbg_package/g" "$template_file"
-          }
-
-          update_config_headers() {
-            template_dir="$1"
-            for config_file in "$template_dir"/files/*-dotconfig; do
-              [ -f "$config_file" ] || continue
-              sed -i -E "s|^# Linux/([^ ]+) [0-9][^ ]* Kernel Configuration$|# Linux/\1 ${VERSION}-lqx${LQX} Kernel Configuration|" "$config_file"
-              sed -i 's/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION="_1"/' "$config_file"
-            done
-          }
-
-          ensure_subpackage_links() {
-            compiler="$1"
-            target="linux${VERSION_KEY}-zen"
-
-            for suffix in headers dbg; do
-              link="linux-${compiler}/${target}-${suffix}"
-              if [ -L "$link" ]; then
-                if [ "$(readlink "$link")" != "$target" ]; then
-                  rm "$link"
-                  ln -s "$target" "$link"
-                fi
-              elif [ ! -e "$link" ]; then
-                ln -s "$target" "$link"
-              fi
-            done
-          }
-
-          subpackage_links_need_update() {
-            compiler="$1"
-            target="linux${VERSION_KEY}-zen"
-
-            for suffix in headers dbg; do
-              link="linux-${compiler}/${target}-${suffix}"
-              if [ ! -L "$link" ] || [ "$(readlink "$link")" != "$target" ]; then
-                return 0
-              fi
-            done
-
-            return 1
-          }
-
-          for compiler in clang gcc; do
-            template_dir="linux-${compiler}/linux${VERSION_KEY}-zen"
-            template_file="$template_dir/template"
-
-            if [ ! -f "$template_file" ]; then
-              reference_template=$(find "linux-${compiler}" -mindepth 2 -maxdepth 2 -name template -type f | sort -V | tail -n 1)
-              if [ -z "$reference_template" ]; then
-                echo "No reference template found for $compiler"
-                continue
-              fi
-
-              reference_dir=$(dirname "$reference_template")
-              mkdir -p "$template_dir"
-              cp -a "$reference_dir/." "$template_dir/"
-              normalize_template "$template_file"
-              update_config_headers "$template_dir"
-              ensure_subpackage_links "$compiler"
-
-              UPDATED="${UPDATED} ${VERSION_KEY}-${compiler}-new"
-              CHANGED_FILES="${CHANGED_FILES} ${template_dir} linux-${compiler}/linux${VERSION_KEY}-zen-headers linux-${compiler}/linux${VERSION_KEY}-zen-dbg"
-              echo "Created $template_file from $reference_template"
-              continue
-            fi
-
-            current_version=$(get_assignment "$template_file" version)
-            current_revision=$(get_assignment "$template_file" revision)
-            current_revision=${current_revision:-1}
-            current_lqx_value=$(current_lqx "$template_file")
-            current_checksum=$(get_assignment "$template_file" checksum)
-            current_root=$(current_wrksrc "$template_file")
-
-            if [ "$current_version" != "$VERSION" ] ||
-              [ "$current_lqx_value" != "$LQX" ] ||
-              [ "$current_checksum" != "$CHECKSUM" ] ||
-              [ "$current_root" != 'zen-kernel-${version}-lqx${_lqx}' ]; then
-
-              normalize_template "$template_file"
-              if [ "$current_version" = "$VERSION" ] && [ "$current_lqx_value" = "$LQX" ] && [ "$current_checksum" != "$CHECKSUM" ]; then
-                sed -i "s/^revision=.*/revision=$((current_revision + 1))/" "$template_file"
-              fi
-              update_config_headers "$template_dir"
-              ensure_subpackage_links "$compiler"
-
-              UPDATED="${UPDATED} ${VERSION_KEY}-${compiler}"
-              CHANGED_FILES="${CHANGED_FILES} ${template_dir} linux-${compiler}/linux${VERSION_KEY}-zen-headers linux-${compiler}/linux${VERSION_KEY}-zen-dbg"
-              echo "Updated $template_file to $TAG_NAME ($ARCHIVE_ROOT)"
-            elif subpackage_links_need_update "$compiler"; then
-              ensure_subpackage_links "$compiler"
-
-              UPDATED="${UPDATED} ${VERSION_KEY}-${compiler}-links"
-              CHANGED_FILES="${CHANGED_FILES} linux-${compiler}/linux${VERSION_KEY}-zen-headers linux-${compiler}/linux${VERSION_KEY}-zen-dbg"
-              echo "Updated subpackage links for $template_file"
-            else
-              echo "No update needed for $template_file"
-            fi
-          done
-
-          UPDATED="${UPDATED# }"
-          CHANGED_FILES="${CHANGED_FILES# }"
-
-          {
-            echo "updated_versions=$UPDATED"
-            echo "changed_files=$CHANGED_FILES"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Commit and push changes
-        run: |
-          set -euo pipefail
-
-          UPDATED="${{ steps.update_templates.outputs.updated_versions }}"
-          CHANGED_FILES="${{ steps.update_templates.outputs.changed_files }}"
-          TAG_NAME="${{ steps.get_release.outputs.tag_name }}"
-
-          if [ -z "$UPDATED" ] || [ -z "$CHANGED_FILES" ]; then
-            echo "No updates needed"
-            exit 0
-          fi
-
+          set -eu
           git config user.name "Wizzard"
           git config user.email "rich@bandaholics.cash"
+          scripts/update.sh -c
 
-          for item in $CHANGED_FILES; do
-            [ -e "$item" ] || [ -L "$item" ] || continue
-            git add "$item"
+      - name: Push
+        run: |
+          set -eu
+          branch="${GITHUB_REF_NAME:-${GITEA_REF_NAME:-main}}"
+          [ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/$branch")" ] || { echo "nothing to push"; exit 0; }
+          for i in 1 2 3; do
+            git pull --rebase origin "$branch" && git push origin "HEAD:$branch" && exit 0
+            echo "push attempt $i failed, retrying"; sleep 10
           done
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-
-          if echo "$UPDATED" | grep -q -- "-new"; then
-            new_templates=$(printf '%s\n' $UPDATED | grep -- "-new" | sed 's/-new$//' | paste -sd ' ' -)
-            git commit -m "Add zen kernel templates for ${new_templates} at ${TAG_NAME} [auto]"
-          else
-            git commit -m "Update zen kernel templates to ${TAG_NAME}: ${UPDATED} [auto]"
-          fi
-
-          branch="${GITHUB_REF_NAME:-${GITEA_REF_NAME:-$(git rev-parse --abbrev-ref HEAD)}}"
-          if [ "$branch" = "HEAD" ]; then
-            branch="main"
-          fi
-
-          git push origin "HEAD:${branch}"
+          exit 1
