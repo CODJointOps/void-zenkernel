@@ -17,14 +17,20 @@ Clang with ThinLTO is the default. `gcc` is the build option `~clang` on the sam
 
 ## Build
 
-Clone this repo inside your void-packages checkout and link the packages in:
+Clone this repo inside your void-packages checkout and link each package in. The package entry
+must be a real directory (xbps-src treats a symlinked `srcpkgs/<name>` as a subpackage), so link
+`template` and `files` inside it:
 
 ```sh
 cd ~/gitprojects/void-packages
 git clone https://git.deadzone.lol/Wizzard/void-zenkernel zen
-ln -s ../zen/srcpkgs/linux7.2-zen srcpkgs/
-ln -s linux7.2-zen srcpkgs/linux7.2-zen-headers
-ln -s linux7.2-zen srcpkgs/linux7.2-zen-dbg
+for s in 7.1 7.2; do
+  mkdir -p srcpkgs/linux$s-zen
+  ln -sfn ../../zen/srcpkgs/linux$s-zen/template srcpkgs/linux$s-zen/template
+  ln -sfn ../../zen/srcpkgs/linux$s-zen/files srcpkgs/linux$s-zen/files
+  ln -sfn linux$s-zen srcpkgs/linux$s-zen-headers
+  ln -sfn linux$s-zen srcpkgs/linux$s-zen-dbg
+done
 ./xbps-src pkg linux7.2-zen              # clang, ThinLTO
 ./xbps-src -o '~clang' pkg linux7.2-zen  # gcc
 ```

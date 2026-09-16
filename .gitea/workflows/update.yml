@@ -27,7 +27,7 @@ jobs:
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
             flex bison bc libelf-dev libssl-dev clang lld llvm dwarves shellcheck
-          sudo curl -fsSL -o /usr/local/bin/xlint https://raw.githubusercontent.com/void-linux/xtools/master/xlint
+          sudo curl -fsSL -o /usr/local/bin/xlint https://raw.githubusercontent.com/leahneukirchen/xtools/master/xlint
           sudo chmod +x /usr/local/bin/xlint
 
       - name: Lint scripts
