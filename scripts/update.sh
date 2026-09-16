@@ -27,14 +27,16 @@ checksum=$(sha256sum "$archive" | cut -d' ' -f1)
 [ -d "$work/$root" ] || tar -xzf "$archive" -C "$work" --wildcards \
 	"$root/Makefile" "$root/Kbuild" "$root/Kconfig" "$root/scripts/*" "$root/arch/x86/*" '*/Kconfig*'
 
+series_dirs() { for d in srcpkgs/linux*-zen; do echo "$d"; done | sort -V; }
+
 # New series: copy the previous one forward and drop what falls out of the window.
 if [ ! -d "$pkg" ]; then
-	prev=$(ls -d srcpkgs/linux*-zen | sort -V | tail -n1)
+	prev=$(series_dirs | tail -n1)
 	cp -a "$prev" "$pkg"
 	sed -i "s/linux[0-9.]*-zen/linux$series-zen/g" "$pkg/template"
 	ln -s "linux$series-zen" "$pkg-headers"
 	ln -s "linux$series-zen" "$pkg-dbg"
-	for old in $(ls -d srcpkgs/linux*-zen | sort -V | head -n -2); do
+	series_dirs | head -n -2 | while read -r old; do
 		rm -rf "$old" "$old-headers" "$old-dbg"
 		echo "pruned $old"
 	done
