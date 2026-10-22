@@ -1,8 +1,8 @@
 # Template file for 'linux7.2-zen'
 pkgname=linux7.2-zen
-version=7.2.11
+version=7.2.12
 revision=1
-_lqx=2
+_lqx=1
 archs="x86_64"
 create_wrksrc=yes
 build_wrksrc="zen-kernel-${version}-lqx${_lqx}"
@@ -11,7 +11,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"
-checksum=aa43d467ca907baf5954a10d140c1c2a69708dd5a49c9c470d9701d7f1280e62
+checksum=93e0c67ba893afd7f668691bb8ec56fbdf6b2864926d3d9b1e2f49bd9ed55c44
 python_version=3
 patch_args="-Np1"
 
