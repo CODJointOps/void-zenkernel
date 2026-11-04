@@ -44,3 +44,4 @@ template, regenerates both configs from Void's `linuxX.Y` base plus `fragments/`
 fragment line is dropped, and commits. It also re-converges the configs daily when Void's base
 moves. Hand runs (`scripts/update.sh` without `-c`) are for inspection: the toolchain probe lines
 (`CONFIG_CC_VERSION_TEXT` and friends) depend on the host compiler, so CI is what commits.
+Commit runs refuse tracked `srcpkgs/` changes, and inspection runs leave the index untouched.

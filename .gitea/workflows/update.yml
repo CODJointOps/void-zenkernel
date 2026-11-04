@@ -24,10 +24,15 @@ jobs:
       - name: Install toolchain
         run: |
           set -eu
-          sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+          for source in /etc/apt/sources.list.d/*; do
+            [ -f "$source" ] || continue
+            grep -q 'packages.microsoft.com' "$source" && sudo rm -f "$source"
+          done
+          sudo apt-get -o Acquire::Retries=5 update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=5 install -y -qq --no-install-recommends \
             flex bison bc libelf-dev libssl-dev clang lld llvm dwarves shellcheck
-          sudo curl -fsSL -o /usr/local/bin/xlint https://raw.githubusercontent.com/leahneukirchen/xtools/master/xlint
+          sudo curl -fsSL --retry 5 --retry-delay 5 --retry-max-time 180 \
+            -o /usr/local/bin/xlint https://raw.githubusercontent.com/leahneukirchen/xtools/master/xlint
           sudo chmod +x /usr/local/bin/xlint
 
       - name: Lint scripts
@@ -43,10 +48,22 @@ jobs:
       - name: Push
         run: |
           set -eu
-          branch="${GITHUB_REF_NAME:-${GITEA_REF_NAME:-main}}"
-          [ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/$branch")" ] || { echo "nothing to push"; exit 0; }
+          branch="${GITEA_REF_NAME:-${GITHUB_REF_NAME:-main}}"
           for i in 1 2 3; do
-            git pull --rebase origin "$branch" && git push origin "HEAD:$branch" && exit 0
-            echo "push attempt $i failed, retrying"; sleep 10
+            if ! git fetch --prune origin "$branch"; then
+              echo "fetch attempt $i failed, retrying"
+              [ "$i" -lt 3 ] && sleep 10
+              continue
+            fi
+            if git rebase "origin/$branch" && git push origin "HEAD:$branch"; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            git reset --hard "origin/$branch"
+            before=$(git rev-parse HEAD)
+            scripts/update.sh -c
+            [ "$(git rev-parse HEAD)" != "$before" ] || { echo "remote already up to date"; exit 0; }
+            echo "push attempt $i failed, regenerated on the current remote; retrying"
+            [ "$i" -lt 3 ] && sleep 10
           done
           exit 1
