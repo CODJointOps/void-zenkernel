@@ -1,8 +1,8 @@
-# Template file for 'linux7.1-zen'
-pkgname=linux7.1-zen
-version=7.1.12
+# Template file for 'linux7.3-zen'
+pkgname=linux7.3-zen
+version=7.3.3
 revision=1
-_lqx=2
+_lqx=1
 archs="x86_64"
 create_wrksrc=yes
 build_wrksrc="zen-kernel-${version}-lqx${_lqx}"
@@ -11,7 +11,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"
-checksum=e93dac7e5d4890693835ef0b12f249c01848d56c62ced3f773bd03950097a494
+checksum=4b625a161ca3459ca9e9873b983bd3c57b74e8e70321d73190c3414bff66e7fc
 python_version=3
 patch_args="-Np1"
 
@@ -187,7 +187,7 @@ do_install() {
 	rm -f ${DESTDIR}/lib
 }
 
-linux7.1-zen-headers_package() {
+linux7.3-zen-headers_package() {
 	preserve=yes
 	nostrip=yes
 	noshlibprovides=yes
@@ -198,7 +198,7 @@ linux7.1-zen-headers_package() {
 	}
 }
 
-linux7.1-zen-dbg_package() {
+linux7.3-zen-dbg_package() {
 	preserve=yes
 	nostrip=yes
 	noverifyrdeps=yes
