@@ -1,6 +1,6 @@
 # Template file for 'linux7.3-zen'
 pkgname=linux7.3-zen
-version=7.3.3
+version=7.3.4
 revision=1
 _lqx=1
 archs="x86_64"
@@ -11,7 +11,7 @@ maintainer="Wizzard <retard@deadzone.lol>"
 license="GPL-2.0-only"
 homepage="https://github.com/zen-kernel/zen-kernel"
 distfiles="https://github.com/zen-kernel/zen-kernel/archive/refs/tags/v${version}-lqx${_lqx}.tar.gz"
-checksum=4b625a161ca3459ca9e9873b983bd3c57b74e8e70321d73190c3414bff66e7fc
+checksum=4561814f83869bed82a665f7f58efe90363d0c3a09bfb8f7ec05c7ad11c58e75
 python_version=3
 patch_args="-Np1"
 
